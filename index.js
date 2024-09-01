@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const downloadGitRepo = require('download-git-repo')
 const ora = require('ora')
+const chalk = require('chalk');
 
 
 program
@@ -16,6 +17,7 @@ program
   .command('create <projectName>')
   .description('创建模板')
   .action(async (projectName) => {
+    console.log(chalk.green('Welcome to Fn CLI'));
     const targetDir = path.join(process.cwd(), projectName); // 目标路径
     if (fs.existsSync(targetDir)) {
       const { isExist } = await inquirer.prompt([
@@ -47,7 +49,6 @@ program
       }
     ]);
 
-    // const templateDir = path.join(__dirname, 'template'); // 模板路径
     const loading = ora('正在下载中...')
     loading.start()
 
@@ -68,9 +69,8 @@ program
 
       fs.writeJsonSync(packageJsonPath, packageJson, { spaces: 2 });
       console.log(`\nProject ${projectName} created successfully!`);
-      console.log(`\nNext steps:\n`);
       console.log(`cd ${projectName}`);
-      console.log(`${answers.packageManager} install`);
+      console.log(`install deps with: ${chalk.cyan('npm i')}\n`);
     })
   });
 
