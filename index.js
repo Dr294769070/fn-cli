@@ -7,11 +7,14 @@ const path = require('path');
 const downloadGitRepo = require('download-git-repo')
 const ora = require('ora')
 const chalk = require('chalk');
+const curPackageJson = require('./package.json');
+const replaceFileContent = require('./libs/replace-file-content')
 
 
+// 配置版本和描述  
 program
-  .version('1.0.0')
-  .description('Generate a new project from template');
+  .version(curPackageJson.version, '-v, --version', '输出版本号')
+  .description('A CLI to generate projects from a template');
 
 program
   .command('create <projectName>')
@@ -44,6 +47,7 @@ program
           {
             name: 'fn-templte',
             value: 'direct:https://github.com/Dr294769070/fn-template.git#master'
+            // value: 'direct:git@github.com:Dr294769070/fn-template.git#master'
           }
         ]
       }
@@ -61,13 +65,18 @@ program
       loading.succeed('创建模版成功')
 
       // 替换内容
+      // 1.替换 package.json 中的信息
       const packageJsonPath = path.join(targetDir, 'package.json');
       const packageJson = fs.readJsonSync(packageJsonPath);
-
       packageJson.name = projectName;
       packageJson.description = answers.description;
-
       fs.writeJsonSync(packageJsonPath, packageJson, { spaces: 2 });
+
+      // 2.替换其他文件内容
+      replaceFileContent(targetDir, {
+        project: projectName
+      })
+
       console.log(`\nProject ${projectName} created successfully!`);
       console.log(`cd ${projectName}`);
       console.log(`install deps with: ${chalk.cyan('npm i')}\n`);
